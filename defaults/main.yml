@@ -1,0 +1,9 @@
+mount_directory: 
+loopfile_name: "loopfile"
+loopfile_path: "/home/{{ ansible_user }}"
+loopfile_full_path: "{{ loopfile_path }}/{{ loopfile_name }}"
+loopfile_size: 50 # in mb
+container_password: test
+user_PUID: "{{ ansible_user }}"
+user_PGID: "{{ ansible_user }}"
+luks_directory: "{{ loopfile_path }}/luks"

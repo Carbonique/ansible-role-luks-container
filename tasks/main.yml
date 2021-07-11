@@ -1,0 +1,103 @@
+- name: "Test if {{ loopfile_full_path }} already exists"
+  stat:
+    path: "{{ loopfile_full_path }}"
+  register: stat_result
+
+- debug:
+    msg: "{{ loopfile_full_path }} already exists. Skipping creation"
+  when: stat_result.stat.exists
+
+- debug:
+    msg: "{{ loopfile_full_path }} does not exist yet. Creating..."
+  when: not stat_result.stat.exists
+
+- name: setup and mount encrypted container
+  block:
+
+  - name: Update apt-get repo and cache
+    apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+  - name: Ensure cryptsetup is installed
+    apt:
+      name:
+        - "cryptsetup"
+      state: present
+      update_cache: false
+
+  - name: "Ensure loopfile path {{ loopfile_path }} exists"
+    file:
+      path: "{{ loopfile_path }}"
+      state: directory
+      mode: 0755
+      owner: "{{ user_PUID }}"
+      group: "{{ user_PGID }}"
+
+  - name: Creating the loopfile
+    command: "dd if=/dev/zero of={{ loopfile_full_path }} bs=1M count={{ loopfile_size }}"
+
+    # Would have been better to skip finding the loopdevice and to do 
+    # the luksFormat and luksOpen through the Ansible module
+    # luks_device, however, I could not get the module working with Adiantum.
+  - name: Find next unused loop device
+    command: losetup -f
+    register: loopdevice
+
+  - name: LuksFormat the loopfile
+    shell: "echo 'this_password_will_be_replaced' | sudo cryptsetup -q luksFormat --cipher xchacha20,aes-adiantum-plain64 --type luks2 --sector-size 4096 {{ loopfile_full_path }}"
+
+  - name: LuksOpen the loopfile
+    shell: "echo 'this_password_will_be_replaced' | sudo cryptsetup luksOpen {{ loopfile_full_path }} {{ loopfile_name }}-mapper"
+
+  - name: Change container pass
+    community.crypto.luks_device:
+      device: "{{ loopdevice.stdout }}" 
+      passphrase: this_password_will_be_replaced
+      new_passphrase: "{{ container_password }}"
+
+  - name: Create ext4 filesystem for container
+    command: "mkfs.ext4 -F -b 4096 /dev/mapper/{{ loopfile_name }}-mapper"
+
+  - name: "Ensure mount directory {{ mount_directory }} exists"
+    file:
+      path: "{{ mount_directory }}"
+      state: directory
+      mode: 0755
+      owner: "{{ user_PUID }}"
+      group: "{{ user_PGID }}"
+
+    # Ansible mount module manipulates fstab, I don't want that as the container first needs to be unlocked
+    # before mounting. Therefore, I use the shell module
+  - name: Mount container
+    shell: sudo mount /dev/mapper/{{ loopfile_name }}-mapper {{ mount_directory }}
+
+  - name: "Ensure Luks directory exists"
+    file:
+      path: "{{ luks_directory }}"
+      state: directory
+      mode: 0755
+      owner: "{{ user_PUID }}"
+      group: "{{ user_PGID }}"
+
+  - name: "Test if luksHeader backup already exists"
+    stat:
+      path: "{{ luks_directory }}/{{ loopfile_name }}-backupHeader"
+    register: backupHeader_result
+
+  - name: Create backup header
+    command: "cryptsetup luksHeaderBackup {{ loopfile_full_path }} --header-backup-file {{ luks_directory }}/{{ loopfile_name }}-backupHeader"
+    when: not backupHeader_result.stat.exists
+
+  - name: Template decrypt.sh script and make executable
+    template:
+      src: decrypt-template.sh
+      dest: "{{ luks_directory }}/decrypt.sh"
+      owner: "{{ user_PUID }}"
+      group: "{{ user_PGID }}"
+      mode: a+x #executable
+
+  - name: Fetch luksHeaderBackup to controller 
+    ansible.builtin.fetch:
+      src: "{{ luks_directory }}/{{ loopfile_name }}-backupHeader"
+      dest: "{{ playbook_dir }}"
+
+  when: not stat_result.stat.exists

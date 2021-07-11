@@ -1,0 +1,6 @@
+galaxy_info:
+  role_name: luks-adiantum-container
+  author: carbonique
+  description: Role for installing and setting up a Luks container encrypted with Adiantum
+  license: "license (MIT)"
+  min_ansible_version: 2.10
