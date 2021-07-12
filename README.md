@@ -19,7 +19,7 @@ For defaults see `defaults/main.yml`.
 | Variable           | Description                                                                                                    | Default                  | Optional/Required |   |
 |--------------------|----------------------------------------------------------------------------------------------------------------|--------------------------|-------------------|---|
 | mount_directory    | Path to mount the Luks container on. Will be created if  it does not exist                                     | null                     | Required          |   |
-| loopfile_name      | Name of the loopfile                                                                                           | encrypted_img            | Required          |   |
+| loopfile_name      | Name of the loopfile                                                                                           | loopfile            | Required          |   |
 | loopfile_path      | Path to store the loopfile in                                                                                  | /home/{{ user }}         | Required          |   |
 | loopfile_size      | Size of the loopfile in MB's (22 MB minimum)                                                                   | 50                       | Required          |   |
 | container_password | Password for the encrypted container                                                                           | null                     | Required          |   |
