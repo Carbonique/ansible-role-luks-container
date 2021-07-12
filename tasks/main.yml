@@ -37,13 +37,13 @@
 
     # Would have been better to skip finding the loopdevice and to do 
     # the luksFormat and luksOpen through the Ansible module
-    # luks_device, however, I could not get the module working with Adiantum.
+    # luks_device, however, I could not get the module working with for example Adiantum cipher
   - name: Find next unused loop device
-    command: losetup -f
+    command: losetup -f   
     register: loopdevice
 
   - name: LuksFormat the loopfile
-    shell: "echo 'this_password_will_be_replaced' | sudo cryptsetup -q luksFormat --cipher xchacha20,aes-adiantum-plain64 --type luks2 --sector-size 4096 {{ loopfile_full_path }}"
+    shell: "echo 'this_password_will_be_replaced' | sudo cryptsetup -q luksFormat --cipher {{ cipher }} --hash {{ hash }} --key-size {{ key_size }} --type luks2 --sector-size {{ sector_size }} {{ loopfile_full_path }}"
 
   - name: LuksOpen the loopfile
     shell: "echo 'this_password_will_be_replaced' | sudo cryptsetup luksOpen {{ loopfile_full_path }} {{ loopfile_name }}-mapper"

@@ -7,3 +7,7 @@ container_password: test
 user_PUID: "{{ ansible_user }}"
 user_PGID: "{{ ansible_user }}"
 luks_directory: "{{ loopfile_path }}/luks"
+cipher:
+hash: sha256
+key_size: 256
+sector_size:
