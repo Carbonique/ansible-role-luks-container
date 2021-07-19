@@ -1,6 +1,7 @@
 - [About](#about)
 - [Requirements](#requirements)
-- [Variables](#variables)
+- [Installation](#installation)
+- [Defaults](#defaults)
 
 # About
 
@@ -12,21 +13,26 @@ The role creates a loopback file which is then encrypted and mounted to a direct
 
 - [`community.crypto.luks_device`](https://docs.ansible.com/ansible/latest/collections/community/crypto/luks_device_module.html) on Ansible controller
 
-# Variables
+# Installation
 
-For defaults see `defaults/main.yml`.
+Add the following to `requirements.yml`:
 
-| Variable           | Description                                                                                                    | Default                  | Optional/Required |   |
-|--------------------|----------------------------------------------------------------------------------------------------------------|--------------------------|-------------------|---|
-| mount_directory    | Path to mount the Luks container on. Will be created if  it does not exist                                     | null                     | Required          |   |
-| loopfile_name      | Name of the loopfile                                                                                           | loopfile            | Required          |   |
-| loopfile_path      | Path to store the loopfile in                                                                                  | /home/{{ user }}         | Required          |   |
-| loopfile_size      | Size of the loopfile in MB's (22 MB minimum)                                                                   | 50                       | Required          |   |
-| container_password | Password for the encrypted container                                                                           | null                     | Required          |   |
-| user_PUID          | UID used when creating the `mount_directory`, `loopfile_path`, and `luks_directory`                            | {{ ansible_user }}       | Required          |   |
-| user_PGID          | GID used when creating the `mount_directory`, `loopfile_path`, and `luks_directory`                            | {{ ansible_user }}       | Required          |   |
-| luks_directory     | Directory in which the mount script and Luks header backups are stored.  Will be created if it does not exist. | {{ loopfile_path }}/luks | Required          |   |
-| cipher             | Cipher to use in encryption                                                                                    | null                     | Required          |   |
-| hash               | Encryption hash                                                                                                | sha256                   | Required          |   |
-| key_size           | Key-size used                                                                                                  | 256                      | Required          |   |
-| sector_size        | Sector size used                                                                                               | null                     | Required          |   |
+```
+- src: git@gitlab.com:carbonique/ansible-role-luks-container.git
+  scm: git
+  name: luks-container
+  version: #Leave empty for latest. To download a specific version: use the tag as listed in repo
+```
+
+For system wide installation:
+`ansible-galaxy install -r requirements.yml`
+
+For installation to the current directory:
+`ansible-galaxy install --roles-path . -r requirements.yml`
+
+# Defaults
+
+Defaults have been prefilled. Variables have to be added by user
+
+For defaults see: `defaults/main.yml`
+For variables see: `vars/main.yml`

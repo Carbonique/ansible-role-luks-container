@@ -1,13 +1,23 @@
-mount_directory: 
+# Name of the loopfile 
 loopfile_name: "loopfile"
+
+#Path to store the loopfile in  
 loopfile_path: "/home/{{ ansible_user }}"
+
 loopfile_full_path: "{{ loopfile_path }}/{{ loopfile_name }}"
-loopfile_size: 50 # in mb
-container_password: test
+
+#Size of the loopfile in MB's (22 MB minimum) 
+loopfile_size: 50
+
+#UID and GID used when creating the `mount_directory`, `loopfile_path`, and `luks_directory`   
 user_PUID: "{{ ansible_user }}"
 user_PGID: "{{ ansible_user }}"
+
+#Directory in which the mount script and Luks header backups are stored.  Directory will be created if it does not exist.
 luks_directory: "{{ loopfile_path }}/luks"
-cipher:
+
+#Cryptographic options:
+cipher: aes
 hash: sha256
 key_size: 256
-sector_size:
+sector_size: 512
