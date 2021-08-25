@@ -21,3 +21,10 @@ cipher: aes
 hash: sha256
 key_size: 256
 sector_size: 512
+
+
+# Path to mount the Luks container on. Directory be created if it does not exist 
+mount_directory:
+
+#Password for the encrypted container 
+container_password:
