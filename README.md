@@ -18,7 +18,7 @@ The role creates a loopback file which is then encrypted and mounted to a direct
 Add the following to `requirements.yml`:
 
 ```
-- src: git@gitlab.com:carbonique/ansible-role-luks-container.git
+- src: https://github.com/carbonique/ansible-role-luks-container.git
   scm: git
   name: luks-container
   version: #Leave empty for latest. To download a specific version: use the tag as listed in repo
